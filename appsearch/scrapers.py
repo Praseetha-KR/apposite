@@ -8,20 +8,21 @@ PLAYSTORE_BASE_URL = 'https://play.google.com/store/'
 
 
 class PlayStoreAppDetailsScraper:
-    def __init__(self, id):
-        self.id = id
-        self.app = {}
+    EMAIL_REGEXP = '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}'
 
-    def _get_developer_email(self, html):
+    @staticmethod
+    def __get_dev_email(html):
         dev_links = query_attr_arr_by_class(html, 'a', 'dev-link', 'href')
         filtered_email = list(
             filter(lambda x: x, map(lambda x: re.match(
-                r'mailto:[a-zA-Z0-9\._]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,4}', x
+                r'mailto:' + PlayStoreAppDetailsScraper.EMAIL_REGEXP, x
             ), dev_links))
         )
         return filtered_email[0].group()[7:] if filtered_email else ''
+        # 7 is len of prefix 'mailto'
 
-    def _app_html_to_obj(self, html):
+    @staticmethod
+    def __html_to_app_obj(html):
         app = {}
         app['icon'] = get_attr_by_class(
             html, 'img', 'cover-image', 'src'
@@ -47,37 +48,36 @@ class PlayStoreAppDetailsScraper:
         app['supported_versions'] = get_content_by_attr(
             html, 'div', {'itemprop': 'operatingSystems'}
         )
-        app['developer_email'] = self._get_developer_email(html)
+        app['developer_email'] = PlayStoreAppDetailsScraper.__get_dev_email(
+            html
+        )
         app['screenshots'] = query_attr_arr_by_class(
             html, 'img', 'screenshot', 'src'
         )
         return app
 
-    def get(self):
+    @classmethod
+    def get(cls, id):
         content = fetch_page_content(
-            PLAYSTORE_BASE_URL + 'apps/details', {'id': self.id}
+            PLAYSTORE_BASE_URL + 'apps/details', {'id': id}
         )
         html = text_to_html(content)
-        self.app = self._app_html_to_obj(html)
-        return self.app
+        return cls.__html_to_app_obj(html)
 
 
 class PlayStoreSearchScraper:
-    def __init__(self, q):
-        self.q = q
-        self.app_ids = []
-
-    def _get_app_ids(self, html, limit):
+    @staticmethod
+    def __query_app_ids(html, limit):
         return list(
             map(lambda x: x.div.get('data-docid'), html.findAll(
                 "div", {"class": 'card'}
             )[:limit])
         )
 
-    def query(self, limit):
+    @classmethod
+    def query(cls, q, limit):
         content = fetch_page_content(
-            PLAYSTORE_BASE_URL + 'search', {'q': self.q, 'c': 'apps'}
+            PLAYSTORE_BASE_URL + 'search', {'q': q, 'c': 'apps'}
         )
         html = text_to_html(content)
-        self.app_ids = self._get_app_ids(html, limit)
-        return self.app_ids
+        return cls.__query_app_ids(html, limit)

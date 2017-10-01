@@ -11,8 +11,7 @@ class AppsSearchView(TemplateView):
     template_name = "appsearch/search.html"
 
     def get(self, request):
-        app_search = AppSearchProcessor('photo edit')
-        apps = app_search.query()
+        apps = AppSearchProcessor.query('photo edit')
         return render(request, self.template_name, {'apps': apps})
 
 

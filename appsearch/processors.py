@@ -6,16 +6,11 @@ RESULTS_COUNT = 10
 
 
 class AppSearchProcessor:
-    def __init__(self, q):
-        self.q = q
-        self.apps = []
+    @staticmethod
+    def __fetch_app_info(app_id):
+        return PlayStoreAppDetailsScraper.get(app_id)
 
-    def _fetch_app_info(self, app_id):
-        appDetailScraper = PlayStoreAppDetailsScraper(app_id)
-        return appDetailScraper.get()
-
-    def query(self):
-        searchScraper = PlayStoreSearchScraper(self.q)
-        app_ids = searchScraper.query(RESULTS_COUNT)
-        self.apps = list(map(lambda x: self._fetch_app_info(x), app_ids))
-        return self.apps
+    @classmethod
+    def query(cls, q):
+        app_ids = PlayStoreSearchScraper.query(q, RESULTS_COUNT)
+        return list(map(lambda x: cls.__fetch_app_info(x), app_ids))
