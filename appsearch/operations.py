@@ -49,3 +49,7 @@ def filter_tagged_apps(tag):
 
 def filter_apps_by_ids(app_ids):
     return App.objects.filter(id__in=app_ids)
+
+
+def get_app(id):
+    return App.objects.get(id=id)

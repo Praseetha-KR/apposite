@@ -1,7 +1,7 @@
 import datetime
 from .operations import (
     save_app, save_app_tag, save_developer, save_screenshot,
-    filter_apps_by_ids, filter_tagged_apps
+    filter_apps_by_ids, filter_tagged_apps, get_app
 )
 from .scrapers import (
     PlayStoreSearchScraper, PlayStoreAppDetailsScraper
@@ -55,3 +55,7 @@ class StorageProcessor:
     @classmethod
     def query_cached_apps(cls, tag):
         return filter_tagged_apps(tag)
+
+    @classmethod
+    def fetch_app(cls, id):
+        return get_app(id)
