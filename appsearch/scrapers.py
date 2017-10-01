@@ -1,58 +1,127 @@
 import re
 from appsearch.utils import (
-    fetch_page_content, text_to_html, get_innerhtml_by_attr,
-    get_content_by_attr, get_attr_by_class, query_attr_arr_by_class
+    fetch_page_content, text_to_html,
+    parse_content_by_attrobj, parse_innerhtml_by_attrobj,
+    parse_attrval_by_attrobj, parse_attrlist_by_attrobj
 )
 
 PLAYSTORE_BASE_URL = 'https://play.google.com/store/'
+SCRAPER_APPID_MAP = {
+    'appid_attr': 'data-docid',
+    'tag': 'div',
+    'attr_key': 'class',
+    'attr_val': 'card'
+}
+SCRAPER_APP_MAP = {
+    'name': {
+        'fetch': 'innertext',
+        'tag': 'div',
+        'attr_key': 'class',
+        'attr_val': 'id-app-title'
+    },
+    'rating': {
+        'fetch': 'innertext',
+        'tag': 'div',
+        'attr_key': 'class',
+        'attr_val': 'score'
+    },
+    'reviews_count': {
+        'fetch': 'innertext',
+        'tag': 'span',
+        'attr_key': 'class',
+        'attr_val': 'reviews-num'
+    },
+    'published_date': {
+        'fetch': 'innertext',
+        'tag': 'div',
+        'attr_key': 'itemprop',
+        'attr_val': 'datePublished'
+    },
+    'current_version': {
+        'fetch': 'innertext',
+        'tag': 'div',
+        'attr_key': 'itemprop',
+        'attr_val': 'softwareVersion'
+    },
+    'supported_os': {
+        'fetch': 'innertext',
+        'tag': 'div',
+        'attr_key': 'itemprop',
+        'attr_val': 'operatingSystems'
+    },
+    'total_downloads': {
+        'fetch': 'innertext',
+        'tag': 'div',
+        'attr_key': 'itemprop',
+        'attr_val': 'numDownloads'
+    },
+    'developer_name': {
+        'fetch': 'innertext',
+        'tag': 'span',
+        'attr_key': 'itemprop',
+        'attr_val': 'name'
+    },
+    'desc': {
+        'fetch': 'innerhtml',
+        'tag': 'div',
+        'attr_key': 'class',
+        'attr_val': 'text-body'
+    },
+    'icon': {
+        'fetch': 'attrval',
+        'tag': 'img',
+        'attr_key': 'class',
+        'attr_val': 'cover-image',
+        'filter_attr_key': 'src'
+    },
+    'screenshots': {
+        'fetch': 'attrvallist',
+        'tag': 'img',
+        'attr_key': 'class',
+        'attr_val': 'screenshot',
+        'filter_attr_key': 'src'
+    }
+}
+FETCHTYPE_FN_MAP = {
+    'innertext': parse_content_by_attrobj,
+    'innerhtml': parse_innerhtml_by_attrobj,
+    'attrval': parse_attrval_by_attrobj,
+    'attrvallist': parse_attrlist_by_attrobj
+}
+EMAIL_REGEXP = '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}'
 
 
 class PlayStoreAppDetailsScraper:
-    EMAIL_REGEXP = '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}'
-
     @staticmethod
     def __get_dev_email(html):
-        dev_links = query_attr_arr_by_class(html, 'a', 'dev-link', 'href')
-        filtered_email = list(
+        dev_links = parse_attrlist_by_attrobj(html, 'a', 'dev-link', 'href')
+        filtered_emails = list(
             filter(lambda x: x, map(lambda x: re.match(
-                r'mailto:' + PlayStoreAppDetailsScraper.EMAIL_REGEXP, x
+                r'mailto:' + EMAIL_REGEXP, x
             ), dev_links))
         )
-        return filtered_email[0].group()[7:] if filtered_email else ''
+        return filtered_emails[0].group()[7:] if len(filtered_emails) else ''
         # 7 is len of prefix 'mailto'
 
     @staticmethod
-    def __html_to_app_obj(html):
+    def __get_parse_fn_args(html, o):
+        arglist = (html, o['tag'], {o['attr_key']: o['attr_val']})
+        attrFilter = o.get('filter_attr_key', None)
+        if attrFilter:
+            arglist += (attrFilter,)
+        return arglist
+
+    @staticmethod
+    def __html_to_app_obj(doc):
         app = {}
-        app['icon'] = get_attr_by_class(
-            html, 'img', 'cover-image', 'src'
-        )
-        app['name'] = get_content_by_attr(
-            html, 'div', {'class': 'id-app-title'}
-        )
-        app['desc'] = str(get_innerhtml_by_attr(
-            html, 'div', {'class': 'text-body'}
-        ))
-        app['rating'] = get_content_by_attr(
-            html, 'div', {'class': 'score'}
-        )
-        app['reviews_count'] = get_content_by_attr(
-            html, 'span', {'class': 'reviews-num'}
-        )
-        app['published_on'] = get_content_by_attr(
-            html, 'div', {'itemprop': 'datePublished'}
-        )
-        app['current_version'] = get_content_by_attr(
-            html, 'div', {'itemprop': 'softwareVersion'}
-        )
-        app['supported_versions'] = get_content_by_attr(
-            html, 'div', {'itemprop': 'operatingSystems'}
-        )
+
+        for k, v in SCRAPER_APP_MAP.items():
+            app[k] = FETCHTYPE_FN_MAP[v['fetch']].__call__(
+                *PlayStoreAppDetailsScraper.__get_parse_fn_args(doc, v)
+            )
+
         app['developer_email'] = PlayStoreAppDetailsScraper.__get_dev_email(
-            html
-        )
-        app['screenshots'] = query_attr_arr_by_class(
-            html, 'img', 'screenshot', 'src'
+            doc
         )
         return app
 
@@ -69,8 +138,11 @@ class PlayStoreSearchScraper:
     @staticmethod
     def __query_app_ids(html, limit):
         return list(
-            map(lambda x: x.div.get('data-docid'), html.findAll(
-                "div", {"class": 'card'}
+            map(lambda x: x.div.get(
+                SCRAPER_APPID_MAP['appid_attr']
+            ), html.findAll(
+                SCRAPER_APPID_MAP['tag'],
+                {SCRAPER_APPID_MAP['attr_key']: SCRAPER_APPID_MAP['attr_val']}
             )[:limit])
         )
 
