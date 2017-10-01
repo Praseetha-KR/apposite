@@ -1,5 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>app detail</h1>
+    {% include "appsearch/partials/search_form.html" %}
+
+    <a href="{{request.META.HTTP_REFERER}}">&lt; back</a>
+
+    <h1>{{ app.name }}</h1>
+    <img src="{{ app.icon }}" alt="">
+    <div>{{ app.developer.name }}</div>
+    <div>{{ app.developer.email }}</div>
+    <div>{{ app.rating }}</div>
+    <div>{{ app.review_count }}</div>
+    <div>{{ app.current_version }}</div>
+    <div>{{ app.supported_os }}</div>
+    <div>{{ app.published_date }}</div>
+    <div>{{ app.total_downloads }}</div>
+    <div>{{ app.desc | safe }}</div>
+    {% for screenshot in app.screenshots.all %}
+        <img src="{{ screenshot.url }}" alt="">
+    {% endfor %}
 {% endblock %}
