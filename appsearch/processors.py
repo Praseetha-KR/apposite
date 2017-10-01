@@ -5,17 +5,17 @@ from appsearch.scrapers import (
 RESULTS_COUNT = 10
 
 
-class PlayStoreAppsSearch:
+class AppSearchProcessor:
     def __init__(self, q):
         self.q = q
         self.apps = []
 
-    def _fetch_app_details(self, app_id):
+    def _fetch_app_info(self, app_id):
         appDetailScraper = PlayStoreAppDetailsScraper(app_id)
         return appDetailScraper.get()
 
     def query(self):
         searchScraper = PlayStoreSearchScraper(self.q)
         app_ids = searchScraper.query(RESULTS_COUNT)
-        self.apps = list(map(lambda x: self._fetch_app_details(x), app_ids))
+        self.apps = list(map(lambda x: self._fetch_app_info(x), app_ids))
         return self.apps

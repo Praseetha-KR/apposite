@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 from django.shortcuts import render
-from appsearch.search import PlayStoreAppsSearch
+from appsearch.processors import AppSearchProcessor
 
 
 class IndexView(TemplateView):
@@ -11,8 +11,8 @@ class AppsSearchView(TemplateView):
     template_name = "appsearch/search.html"
 
     def get(self, request):
-        apps_search = PlayStoreAppsSearch('photo edit')
-        apps = apps_search.query()
+        app_search = AppSearchProcessor('photo edit')
+        apps = app_search.query()
         return render(request, self.template_name, {'apps': apps})
 
 
