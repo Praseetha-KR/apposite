@@ -1,2 +1,2 @@
--r requirements/codestyle.txt
+-r requirements/dev.txt
 -r requirements/base.txt
