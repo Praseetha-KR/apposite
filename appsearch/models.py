@@ -1,4 +1,5 @@
 from django.db import models
+from taggit.managers import TaggableManager
 
 
 class Developer(models.Model):
@@ -20,6 +21,7 @@ class App(models.Model):
     developer = models.ForeignKey(
         'Developer', related_name='developer', null=True
     )
+    tags = TaggableManager()
 
 
 class Screenshot(models.Model):
