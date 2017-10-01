@@ -19,6 +19,19 @@ SCRAPER_APP_MAP = {
         'attr_key': 'class',
         'attr_val': 'id-app-title'
     },
+    'icon': {
+        'fetch': 'attrval',
+        'tag': 'img',
+        'attr_key': 'class',
+        'attr_val': 'cover-image',
+        'filter_attr_key': 'src'
+    },
+    'desc': {
+        'fetch': 'innerhtml',
+        'tag': 'div',
+        'attr_key': 'class',
+        'attr_val': 'text-body'
+    },
     'rating': {
         'fetch': 'innertext',
         'tag': 'div',
@@ -55,31 +68,25 @@ SCRAPER_APP_MAP = {
         'attr_key': 'itemprop',
         'attr_val': 'numDownloads'
     },
-    'developer_name': {
-        'fetch': 'innertext',
-        'tag': 'span',
-        'attr_key': 'itemprop',
-        'attr_val': 'name'
-    },
-    'desc': {
-        'fetch': 'innerhtml',
-        'tag': 'div',
-        'attr_key': 'class',
-        'attr_val': 'text-body'
-    },
-    'icon': {
-        'fetch': 'attrval',
-        'tag': 'img',
-        'attr_key': 'class',
-        'attr_val': 'cover-image',
-        'filter_attr_key': 'src'
-    },
     'screenshots': {
         'fetch': 'attrvallist',
         'tag': 'img',
         'attr_key': 'class',
         'attr_val': 'screenshot',
         'filter_attr_key': 'src'
+    },
+    'developer_name': {
+        'fetch': 'innertext',
+        'tag': 'span',
+        'attr_key': 'itemprop',
+        'attr_val': 'name'
+    },
+    'developer_email': {
+        'fetch': '',
+        'tag': 'a',
+        'attr_key': 'class',
+        'attr_val': 'dev-link',
+        'filter_attr_key': 'href'
     }
 }
 FETCHTYPE_FN_MAP = {
@@ -89,49 +96,6 @@ FETCHTYPE_FN_MAP = {
     'attrvallist': parse_attrlist_by_attrobj
 }
 EMAIL_REGEXP = '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}'
-
-
-class PlayStoreAppDetailsScraper:
-    @staticmethod
-    def __get_dev_email(html):
-        dev_links = parse_attrlist_by_attrobj(html, 'a', 'dev-link', 'href')
-        filtered_emails = list(
-            filter(lambda x: x, map(lambda x: re.match(
-                r'mailto:' + EMAIL_REGEXP, x
-            ), dev_links))
-        )
-        return filtered_emails[0].group()[7:] if len(filtered_emails) else ''
-        # 7 is len of prefix 'mailto'
-
-    @staticmethod
-    def __get_parse_fn_args(html, o):
-        arglist = (html, o['tag'], {o['attr_key']: o['attr_val']})
-        attrFilter = o.get('filter_attr_key', None)
-        if attrFilter:
-            arglist += (attrFilter,)
-        return arglist
-
-    @staticmethod
-    def __html_to_app_obj(doc):
-        app = {}
-
-        for k, v in SCRAPER_APP_MAP.items():
-            app[k] = FETCHTYPE_FN_MAP[v['fetch']].__call__(
-                *PlayStoreAppDetailsScraper.__get_parse_fn_args(doc, v)
-            )
-
-        app['developer_email'] = PlayStoreAppDetailsScraper.__get_dev_email(
-            doc
-        )
-        return app
-
-    @classmethod
-    def get(cls, id):
-        content = fetch_page_content(
-            PLAYSTORE_BASE_URL + 'apps/details', {'id': id}
-        )
-        html = text_to_html(content)
-        return cls.__html_to_app_obj(html)
 
 
 class PlayStoreSearchScraper:
@@ -153,3 +117,54 @@ class PlayStoreSearchScraper:
         )
         html = text_to_html(content)
         return cls.__query_app_ids(html, limit)
+
+
+class PlayStoreAppDetailsScraper:
+    @staticmethod
+    def __get_dev_email(html):
+        dev_links = parse_attrlist_by_attrobj(
+            html, SCRAPER_APP_MAP['developer_email']['tag'],
+            {SCRAPER_APP_MAP['developer_email'][
+                'attr_key'
+            ]: SCRAPER_APP_MAP['developer_email']['attr_val']},
+            SCRAPER_APP_MAP['developer_email']['filter_attr_key']
+        )
+        filtered_emails = list(
+            filter(lambda x: x, map(lambda x: re.match(
+                r'mailto:' + EMAIL_REGEXP, x
+            ), dev_links))
+        )
+        return filtered_emails[0].group()[7:] if len(filtered_emails) else ''
+        # 7 is the length of 'mailto'
+
+    @staticmethod
+    def __get_parse_fn_args(html, o):
+        arglist = (html, o['tag'], {o['attr_key']: o['attr_val']})
+        attrFilter = o.get('filter_attr_key', None)
+        if attrFilter:
+            arglist += (attrFilter,)
+        return arglist
+
+    @staticmethod
+    def __html_to_app_obj(doc):
+        app = {}
+
+        for k, v in SCRAPER_APP_MAP.items():
+            if not v['fetch']:
+                continue
+            app[k] = FETCHTYPE_FN_MAP[v['fetch']].__call__(
+                *PlayStoreAppDetailsScraper.__get_parse_fn_args(doc, v)
+            )
+
+        app['developer_email'] = PlayStoreAppDetailsScraper.__get_dev_email(
+            doc
+        )
+        return app
+
+    @classmethod
+    def get(cls, id):
+        content = fetch_page_content(
+            PLAYSTORE_BASE_URL + 'apps/details', {'id': id}
+        )
+        html = text_to_html(content)
+        return cls.__html_to_app_obj(html)
