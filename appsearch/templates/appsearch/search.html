@@ -2,16 +2,20 @@
 
 {% block content %}
 <h1>apps search</h1>
-{% for app in apps %}
-    <div class="card">
-        <h1>{{ app.name }}</h1>
-        <img src="{{ app.icon }}" alt="">
-        <div><a href="">{{ app.developer_email }}</a></div>
-        <p>{{ app.desc | safe}}</p>
-        {% for screenshot in app.screenshots.all %}
-            <img src="{{ screenshot.url }}" alt="">
+    {% if apps %}
+        {% for app in apps %}
+            <div class="card">
+                <h1>{{ app.name }}</h1>
+                <img src="{{ app.icon }}" alt="">
+                <div><a href="">{{ app.developer_email }}</a></div>
+                <p>{{ app.desc | safe}}</p>
+                {% for screenshot in app.screenshots.all %}
+                    <img src="{{ screenshot.url }}" alt="">
+                {% endfor %}
+            </div>
+            <hr/>
         {% endfor %}
-    </div>
-    <hr/>
-{% endfor %}
+    {% else %}
+        <p>No search results.</p>
+    {% endif %}
 {% endblock %}
