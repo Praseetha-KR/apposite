@@ -1,10 +1,6 @@
 from .models import App, Developer, Screenshot
 
 
-def filter_apps(app_ids):
-    return App.objects.filter(id__in=app_ids)
-
-
 def save_developer(name, email):
     developer, created = Developer.objects.get_or_create(
         name=name,
@@ -41,3 +37,15 @@ def save_screenshot(screenshots, app):
         screenshot_list.append(screenshot)
     return screenshot_list
 
+
+def save_app_tag(app, tag):
+    app.tags.add(tag)
+    return app.tags.all()
+
+
+def filter_tagged_apps(tag):
+    return App.objects.filter(tags__name__in=[tag])
+
+
+def filter_apps_by_ids(app_ids):
+    return App.objects.filter(id__in=app_ids)
