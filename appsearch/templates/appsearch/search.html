@@ -8,8 +8,8 @@
         <img src="{{ app.icon }}" alt="">
         <div><a href="">{{ app.developer_email }}</a></div>
         <p>{{ app.desc | safe}}</p>
-        {% for screenshot in app.screenshots %}
-            <img src="{{ screenshot }}" alt="">
+        {% for screenshot in app.screenshots.all %}
+            <img src="{{ screenshot.url }}" alt="">
         {% endfor %}
     </div>
     <hr/>
