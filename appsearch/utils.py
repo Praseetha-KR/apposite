@@ -11,22 +11,22 @@ def text_to_html(text):
     return BeautifulSoup(text, 'html.parser')
 
 
-def get_content_by_attr(html, tag, attr):
-    elem = html.find_all(tag, attr)
-    return elem[0].string if elem else ''
+def parse_content_by_attrobj(html, tag, attrlist):
+    elem = html.find_all(tag, attrlist)
+    return elem[0].string if len(elem) else ''
 
 
-def get_innerhtml_by_attr(html, tag, attr):
-    elem = html.find_all(tag, attr)
-    return elem[0] if elem else ''
+def parse_innerhtml_by_attrobj(html, tag, attrlist):
+    elem = html.find_all(tag, attrlist)
+    return str(elem[0]) if len(elem) else ''
 
 
-def get_attr_by_class(html, tag, classname, attr):
-    elem = html.find_all(tag, {'class': classname})
-    return elem[0].get(attr) if elem else ''
+def parse_attrval_by_attrobj(html, tag, attrlist, filterkey):
+    elem = html.find_all(tag, attrlist)
+    return elem[0].get(filterkey) if len(elem) else ''
 
 
-def query_attr_arr_by_class(html, tag, classname, attr):
+def parse_attrlist_by_attrobj(html, tag, attrlist, filterkey):
     return list(map(
-        lambda x: x.get(attr), html.find_all(tag, {'class': classname})
+        lambda x: x.get(filterkey), html.find_all(tag, attrlist)
     ))
