@@ -1,5 +1,5 @@
 import datetime
-from .operations import (
+from .db_operations import (
     save_app, save_app_tag, save_developer, save_screenshot,
     filter_apps_by_ids, filter_tagged_apps, get_app
 )
