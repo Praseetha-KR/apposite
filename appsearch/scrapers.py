@@ -1,18 +1,18 @@
 import re
-from appsearch.utils import (
+from .utils import (
     fetch_page_content, text_to_html,
     parse_content_by_attrobj, parse_innerhtml_by_attrobj,
     parse_attrval_by_attrobj, parse_attrlist_by_attrobj
 )
 
-PLAYSTORE_BASE_URL = 'https://play.google.com/store/'
-PLAYSTORE_APPID_MAP = {
+PLAY_BASE_URL = 'https://play.google.com/store/'
+PLAY_SEARCH_APPS_DOM_MAP = {
     'appid_attr': 'data-docid',
     'tag': 'div',
     'attr_key': 'class',
     'attr_val': 'card'
 }
-PLAYSTORE_APP_MAP = {
+PLAY_APP_DETAILS_DOM_MAP = {
     'name': {
         'fetch': 'innertext',
         'tag': 'div',
@@ -103,19 +103,19 @@ class PlayStoreSearchScraper:
     def __query_app_ids(html, limit):
         return list(
             map(lambda x: x.div.get(
-                PLAYSTORE_APPID_MAP['appid_attr']
+                PLAY_SEARCH_APPS_DOM_MAP['appid_attr']
             ), html.findAll(
-                PLAYSTORE_APPID_MAP['tag'],
-                {PLAYSTORE_APPID_MAP[
+                PLAY_SEARCH_APPS_DOM_MAP['tag'],
+                {PLAY_SEARCH_APPS_DOM_MAP[
                     'attr_key'
-                ]: PLAYSTORE_APPID_MAP['attr_val']}
+                ]: PLAY_SEARCH_APPS_DOM_MAP['attr_val']}
             )[:limit])
         )
 
     @classmethod
     def query(cls, q, limit):
         content = fetch_page_content(
-            PLAYSTORE_BASE_URL + 'search', {'q': q, 'c': 'apps'}
+            PLAY_BASE_URL + 'search', {'q': q, 'c': 'apps'}
         )
         html = text_to_html(content)
         return cls.__query_app_ids(html, limit)
@@ -125,11 +125,11 @@ class PlayStoreAppDetailsScraper:
     @staticmethod
     def __get_dev_email(html):
         dev_links = parse_attrlist_by_attrobj(
-            html, PLAYSTORE_APP_MAP['developer_email']['tag'],
-            {PLAYSTORE_APP_MAP['developer_email'][
+            html, PLAY_APP_DETAILS_DOM_MAP['developer_email']['tag'],
+            {PLAY_APP_DETAILS_DOM_MAP['developer_email'][
                 'attr_key'
-            ]: PLAYSTORE_APP_MAP['developer_email']['attr_val']},
-            PLAYSTORE_APP_MAP['developer_email']['filter_attr_key']
+            ]: PLAY_APP_DETAILS_DOM_MAP['developer_email']['attr_val']},
+            PLAY_APP_DETAILS_DOM_MAP['developer_email']['filter_attr_key']
         )
         filtered_emails = list(
             filter(lambda x: x, map(lambda x: re.match(
@@ -151,7 +151,7 @@ class PlayStoreAppDetailsScraper:
     def __html_to_app_obj(doc, appid):
         app = {}
         app['id'] = appid
-        for k, v in PLAYSTORE_APP_MAP.items():
+        for k, v in PLAY_APP_DETAILS_DOM_MAP.items():
             if not v['fetch']:
                 continue
             app[k] = FETCHTYPE_FN_MAP[v['fetch']].__call__(
@@ -166,7 +166,7 @@ class PlayStoreAppDetailsScraper:
     @classmethod
     def get(cls, id):
         content = fetch_page_content(
-            PLAYSTORE_BASE_URL + 'apps/details', {'id': id}
+            PLAY_BASE_URL + 'apps/details', {'id': id}
         )
         html = text_to_html(content)
         return cls.__html_to_app_obj(html, id)
