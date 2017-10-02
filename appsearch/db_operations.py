@@ -2,38 +2,37 @@ from .models import App, Developer, Screenshot
 
 
 def save_developer(name, email):
-    developer, created = Developer.objects.get_or_create(
-        name=name,
-        email=email
-    )
+    developer, created = Developer.objects.get_or_create(email=email)
+    developer.name = name
+    developer.save()
+
     return developer
 
 
 def save_app(appid, name, desc, icon, rating, review_count, published_date,
              current_version, supported_os, total_downloads, developer):
-    app, created = App.objects.get_or_create(
-        appid=appid,
-        name=name,
-        desc=desc,
-        icon=icon,
-        rating=rating,
-        review_count=review_count,
-        published_date=published_date,
-        current_version=current_version,
-        supported_os=supported_os,
-        total_downloads=total_downloads,
-        developer=developer
-    )
+    app, created = App.objects.get_or_create(appid=appid)
+    app.name = name
+    app.desc = desc
+    app.icon = icon
+    app.rating = rating
+    app.review_count = review_count
+    app.published_date = published_date
+    app.current_version = current_version
+    app.supported_os = supported_os
+    app.total_downloads = total_downloads
+    app.developer = developer
+    app.save()
     return app
 
 
 def save_screenshot(screenshots, app):
     screenshot_list = []
     for url in screenshots:
-        screenshot, created = Screenshot.objects.get_or_create(
-            app=app,
-            url=url
-        )
+        screenshot, created = Screenshot.objects.get_or_create(app=app)
+        screenshot.url = url
+        screenshot.save()
+
         screenshot_list.append(screenshot)
     return screenshot_list
 
