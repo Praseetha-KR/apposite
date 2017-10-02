@@ -19,7 +19,9 @@ class AppsSearchView(TemplateView):
         if not len(apps):
             search_result = SearchProcessor.query(tag)
             apps = StorageProcessor.save_apps(search_result, tag)
-        return render(request, self.template_name, {'apps': apps})
+        return render(request, self.template_name, {
+            'apps': apps, 'q': search_q
+        })
 
     def post(self, request):
         return HttpResponseRedirect('/search?q=' + request.POST.get('q', None))
