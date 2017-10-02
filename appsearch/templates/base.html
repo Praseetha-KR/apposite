@@ -6,9 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Apposite</title>
+    <link href="//fonts.googleapis.com/css?family=Montserrat:300" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'style/ionicons.css' %}">
+    <link rel="stylesheet" href="{% static 'style/appsearch.css' %}">
 </head>
 <body>
-    {% block content %}{% endblock %}
+    <header class="as-header">
+        <div class="container flex flex-justified">
+            <div class="as-header__sitetitle">
+                <a class="as-header__logo" href="{% url 'index' %}">
+                    app<span class="as-header__logo-o">o</span>site
+                </a>
+            </div>
+            <div class="as-header__search">
+            {% block headersearch %}
+                {% include "appsearch/partials/search_form.html" %}
+            {% endblock %}
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+        {% block content %}{% endblock %}
+        </div>
+    </main>
 </body>
 </html>

@@ -1,16 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% include "appsearch/partials/search_form.html" %}
+    <div class="container page-wrapper">
     {% if apps %}
-        {% for app in apps %}
-            <a class="card" href="{% url 'app_detail' app.id %}">
-                <h1>{{ app.name }}</h1>
-                <img src="{{ app.icon }}" alt="">
+        <div class="as-appgrid flex flex-l-2d">
+            {% for app in apps %}
+            <div class="col col-mp-1 col-xs-2 col-sm-3 col-md-4 col-lg-5">
+                <a class="as-appgrid__card" href="{% url 'app_detail' app.id %}">
+                    <div class="as-appgrid__card__header flex flex-center-abs">
+                        <img class="as-appgrid__card__icon" src="{{ app.icon }}" />
+                    </div>
+                    <div class="as-appgrid__card__footer flex flex-col flex-center-v text-center">
+                        <h3 class="as-appgrid__card__title flex flex-center-v">{{ app.name }}</h3>
+                        <div class="as-appgrid__card__rating">
+                            <i class="ion-ios-star color-primary"></i>
+                            {{ app.rating }}
+                        </div>
+                    </div>
                 </a>
-            <hr/>
-        {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
     {% else %}
         <p>No search results.</p>
     {% endif %}
+    </div>
 {% endblock %}
+
+

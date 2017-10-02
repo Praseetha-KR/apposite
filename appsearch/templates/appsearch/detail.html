@@ -1,22 +1,62 @@
 {% extends "base.html" %}
 
 {% block content %}
-    {% include "appsearch/partials/search_form.html" %}
+    <div class="container page-wrapper">
+        <nav class="as-nav">
+            <a href="{{request.META.HTTP_REFERER}}">
+                <i class="ion-android-arrow-back"></i>
+                back
+            </a>
+        </nav>
 
-    <a href="{{request.META.HTTP_REFERER}}">&lt; back</a>
-
-    <h1>{{ app.name }}</h1>
-    <img src="{{ app.icon }}" alt="">
-    <div>{{ app.developer.name }}</div>
-    <div>{{ app.developer.email }}</div>
-    <div>{{ app.rating }}</div>
-    <div>{{ app.review_count }}</div>
-    <div>{{ app.current_version }}</div>
-    <div>{{ app.supported_os }}</div>
-    <div>{{ app.published_date }}</div>
-    <div>{{ app.total_downloads }}</div>
-    <div>{{ app.desc | safe }}</div>
-    {% for screenshot in app.screenshots.all %}
-        <img src="{{ screenshot.url }}" alt="">
-    {% endfor %}
+        <section class="as-app flex flex-col flex-center-v">
+            <h1 class="as-app__name">{{ app.name }}</h1>
+            <div class="as-app__icon-container">
+                <img class="as-app__icon" src="{{ app.icon }}" alt="">
+            </div>
+            <div class="as-app__rnr flex">
+                <h3 class="as-app__rnr__rating">
+                    <i class="ion-ios-star color-primary"></i>
+                    {{ app.rating }}
+                </h3>
+                <h3 class="as-app__rnr__review">
+                    <i class="ion-person color-primary"></i>
+                    {{ app.review_count }}
+                </h3>
+            </div>
+            <div class="as-app__developer flex flex-col flex-center-v">
+                <div class="as-app__developer__name">{{ app.developer.name }}</div>
+                <div class="as-app__developer__email">
+                    <i class="ion-ios-email-outline"></i>
+                    {{ app.developer.email }}
+                </div>
+            </div>
+            <div class="as-app__meta flex">
+                <div class="as-app__meta__published">
+                    <strong>Published on:</strong>
+                    {{ app.published_date }}
+                </div>
+                <div class="as-app__meta__version">
+                    <strong>Current version:</strong>
+                    {{ app.current_version }}
+                </div>
+                <div class="as-app__meta__os">
+                    <strong>Supported OS:</strong>
+                    {{ app.supported_os }}
+                </div>
+            </div>
+            <div class="as-app__downloads">
+                <i class="ion-ios-download-outline"></i>
+                {{ app.total_downloads }} downloads
+            </div>
+            <div class="as-app__desc">{{ app.desc | safe }}</div>
+            <div class="as-app__screenshots flex flex-center-h">
+                <div class="as-app__screenshots__scroller flex flex-l-1d">
+                    {% for screenshot in app.screenshots.all %}
+                        <img class="as-app__screenshots__img" src="{{ screenshot.url }}" alt="">
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
 {% endblock %}
