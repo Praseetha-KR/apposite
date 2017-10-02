@@ -1,0 +1,12 @@
+<a class="as-appcard" href="{% url 'app_detail' app.id %}">
+    <div class="as-appcard__header flex flex-center-abs">
+        <img class="as-appcard__icon" src="{{ app.icon }}" />
+    </div>
+    <div class="as-appcard__footer flex flex-col flex-center-v text-center">
+        <h3 class="as-appcard__title flex flex-center-v">{{ app.name }}</h3>
+        <div class="as-appcard__rating">
+            <i class="ion-ios-star color-primary"></i>
+            {{ app.rating }}
+        </div>
+    </div>
+</a>

@@ -144,13 +144,14 @@ a, a:hover, a:active, a:focus {
 
 
 /* ============================================================================
-   APP SPECIFIC
+   SPECIFIC
 ==============================================================================*/
 
 $header-sitetitle-width: 20%;
 $header-search-width: 100% - 2 * $header-sitetitle-width;
 $appcard-radius: 1.5em;
 
+/* appsearch */
 .as {
     &-header {
         padding: 2em 0;
@@ -187,47 +188,45 @@ $appcard-radius: 1.5em;
             font-weight: 600;
         }
     }
-    &-appgrid {
-        &__card {
-            display: block;
-            background: $color__white;
-            color: $color__body-text;
-            border-radius: $appcard-radius;
-            border: 1px solid lighten($color__gray-border, 13%);
-            box-shadow: 0 5px 20px darken($color__silver, 4%);
+    &-appcard {
+        display: block;
+        background: $color__white;
+        color: $color__body-text;
+        border-radius: $appcard-radius;
+        border: 1px solid lighten($color__gray-border, 13%);
+        box-shadow: 0 5px 20px darken($color__silver, 4%);
+        overflow: hidden;
+        width: 85%;
+        margin: 1.3em auto;
+        &__header {
             overflow: hidden;
-            width: 85%;
-            margin: 1.3em auto;
-            &__header {
-                overflow: hidden;
-                height: 20em;
-                @media (min-width: $bp-xs-min) {
-                    height: 18em;
-                }
-                @media (min-width: $bp-sm-min) {
-                    height: 16em;
-                }
-                @media (min-width: $bp-lg-min) {
-                    height: 24em;
-                }
+            height: 20em;
+            @media (min-width: $bp-xs-min) {
+                height: 18em;
             }
-            &__footer {
-                padding: 0 1.2em;
+            @media (min-width: $bp-sm-min) {
+                height: 16em;
             }
-            &__icon {
-                width: 60%;
-                height: auto;
-                overflow: hidden;
+            @media (min-width: $bp-lg-min) {
+                height: 24em;
             }
-            &__title {
-                font-size: 1.1em;
-                height: 2.5em;
-            }
-            &__rating {
-                padding-top: 0.5em;
-                padding-bottom: 1.5em;
-                color: $color__gray-text;
-            }
+        }
+        &__footer {
+            padding: 0 1.2em;
+        }
+        &__icon {
+            width: 60%;
+            height: auto;
+            overflow: hidden;
+        }
+        &__title {
+            font-size: 1.1em;
+            height: 2.5em;
+        }
+        &__rating {
+            padding-top: 0.5em;
+            padding-bottom: 1.5em;
+            color: $color__gray-text;
         }
     }
     &-app {
