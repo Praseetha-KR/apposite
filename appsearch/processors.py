@@ -18,7 +18,7 @@ class SearchProcessor:
     @classmethod
     def query(cls, q):
         app_ids = PlayStoreSearchScraper.query(q, RESULTS_COUNT)
-        return list(map(lambda x: cls.__fetch_app_info(x), app_ids))
+        return list(map(cls.__fetch_app_info, app_ids))
 
 
 class StorageProcessor:

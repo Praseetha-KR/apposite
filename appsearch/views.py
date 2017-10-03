@@ -12,9 +12,8 @@ class AppsSearchView(TemplateView):
     template_name = "appsearch/search.html"
 
     def get(self, request):
-        search_q = request.GET.get('q', None)
+        search_q = request.GET.get('q', '')
         tag = search_q.lower() if (search_q and len(search_q)) else 'unicorn'
-        apps = []
         apps = StorageProcessor.query_cached_apps(tag)
         if not len(apps):
             search_result = SearchProcessor.query(tag)
