@@ -13,7 +13,7 @@ class AppsSearchView(TemplateView):
 
     def get(self, request):
         search_q = request.GET.get('q', None)
-        tag = search_q if (search_q and len(search_q)) else 'unicorn'
+        tag = search_q.lower() if (search_q and len(search_q)) else 'unicorn'
         apps = []
         apps = StorageProcessor.query_cached_apps(tag)
         if not len(apps):
